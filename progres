@@ -1,0 +1,132 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>EVIL GIRLS</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+        <!-- Place favicon.ico in the root directory -->
+
+        <style>
+            
+            body {
+                padding: 10px;
+                margin: 0;
+                font: 14px verdana;
+            }
+            .evil-game {
+                width: 600px;
+                height: 600px;
+                margin: 0 auto;
+                position: relative;
+                border: 1px solid red;
+            }
+            .evil-catcher {
+                position: absolute;
+                left: 50%;
+                margin: 0 0 0 -30px;
+                bottom: 10px;
+                width: 60px;
+                height: 60px;
+                border: 1px solid green;
+                background: yellow;
+            }
+            /* http://css-tricks.com/css-media-queries/ */
+            @media all and (max-width: 630px) {
+                .evil-game {
+                    width: 100%;
+                }
+            }
+        </style>
+    </head>
+    <body>
+
+        
+        <div class="evil-game">
+
+            <div class="evil-catcher">
+
+            </div>
+                <div class="evil-candy">
+
+        </div>
+        </div>
+
+        <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+
+        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+        <script>
+            window.console.log("1234 455");
+            // http://api.jquery.com/
+            // CONFIG ? MODEL
+            var $catcher = $('.evil-catcher');
+            var catcherWidth = 60;
+            var maxWidth = $('.evil-game').innerWidth();
+            var model = {
+                'width': 123,
+                'lives': 4,
+                'highscore': 0
+            
+
+            };
+            // CONTROLLER FUNCTIONS
+            var resetValues = function () {
+                maxWidth = $('.evil-game').innerWidth();
+                console.log(maxWidth);
+            }
+            var setPosition = function (direction) {
+                console.log($catcher.offsetLeft);
+                $catcher.css('left', 10);
+            };
+            // EVENTS
+            $(window).on("resize", function() {
+                resetValues();
+            });
+            $(window).on("keydown", function(e) {
+                
+                var key = e.keyCode;
+                if (key === 37 || key === 39) {
+                    setPosition(key);
+                }
+            });
+             window.console.log("1234 455");
+            // http://api.jquery.com/
+            // CONFIG ? MODEL
+            var $candy = $('.evil-candy');
+            var candyWidth = 20;
+            var maxWidth = $('.evil-game').innerWidth();
+            var model = {
+                'width': 20,
+                'lives': 4,
+                'highscore': 0
+                
+                function fallingCandy() {
+                    return [fallingCandy]
+
+        var candy = $('<div class="candy"></div>');
+        $('#candyZone').prepend(candy);
+        candyX = Math.floor(Math.random() * $('#site').width());
+        candySpd = Math.floor(Math.random() + 5000);
+
+        candy.css({'left':candyX+'px'});
+        candy.animate({
+            top: "500px",
+            opacity : "0",
+
+        }, candySpd, function(){
+            $(this).remove();
+            fallingCandy();
+        });
+
+    }
+    var timer = Math.floor(Math.random() +1000);
+
+    window.setInterval(function(){
+        fallingCandy();
+    }, timer);
+        </script>
+    </body>
+</html>
