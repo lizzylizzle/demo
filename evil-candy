@@ -96,9 +96,13 @@
 
             // TODO: ON MOBILE WE HAVE SMALLER ONES
             var catcherWidth = 60; // number
+            var catcherTop = 0; // number, catcher top position
+            var catcherLeft = 0;
+
             var candyWidth = 30; // number
             var speed = 1; // number
 
+            var frames = 0;
             var PIXELS = 10;
             var DROP = 100; // CANDY DROP PIXELS
 
@@ -114,6 +118,10 @@
                 'highscore': 0
             };
 
+            var gameOver = function() {
+                freeze = true;
+                // TODO: RESET OUR MODEL
+            };
 
             //#################
             // CONTROLLER FUNCTIONS
@@ -125,22 +133,25 @@
                 // Do position catcher in the middle
                 var pos = maxWidth / 2 - catcherWidth / 2;
                 $catcher.css('left', pos);
+
+                catcherTop = $catcher[0].offsetTop; // top position does not change during our game
+
             }
 
             //#################
             // MOVE OUR CATCHER
-            var setPosition = function (direction) {
+            var setPositionCatcher = function (direction) {
                 
-                var pos = $catcher[0].offsetLeft + (PIXELS * direction);
+                var catcherLeft = $catcher[0].offsetLeft + (PIXELS * direction);
                 var max = maxWidth - catcherWidth;
 
-                if (pos > max) {
-                    pos = 0;
-                } else if (pos < 0) {
-                    pos = max;
+                if (catcherLeft > max) {
+                    catcherLeft = 0;
+                } else if (catcherLeft < 0) {
+                    catcherLeft = max;
                 }
 
-                $catcher.css('left', pos);
+                $catcher.css('left', catcherLeft);
             };
 
 
@@ -164,6 +175,7 @@
                 falling.push({
                     'object': $candy,
                     'top': 0,
+                    'left': x,
                     'speed': speed
                 });
 
@@ -181,17 +193,35 @@
                 // http://api.jquery.com/jquery.each/
                 // is a simple for loop
                 $.each(falling, function(i, candy) {
+                    
+                    // if a candy in our collection is defined (so not deleted)
+                    if (candy) {
 
-                    candy.top += modifier * DROP;
-                    (candy.object).css('top', candy.top);
+                        candy.top += modifier * DROP;
+                        (candy.object).css('top', candy.top);
 
-                    // REACHED GROUND
-                    if (candy.top > maxHeight) {
-                        // candy reached ground
-                        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice
-                        falling.splice(i, 1);
+                        // REACHED GROUND
+                        if (candy.top > maxHeight) {
+                            // candy reached ground
+                            
+                            delete falling[i]; // leaves undefined item in our collection
+                            // TAKE A LIFE
+                            model.lives--;
 
-                        // TODO: TAKE A LIFE
+                            if (model.lives === 0) {
+                                gameOver();
+                            }
+                        }
+
+                        if (candy.top >= catcherTop) {
+                            // THE CANDY IS IN REACH OF OUR CATCHER
+                            // TODO: NOW USE LEFT POSTION OF CATCHER
+                            /*
+                            candy.left candyWidth
+                            catcherLeft catcherWidth
+                            */
+                            console.log('UHUUU', catcherTop);
+                        }
                     }
 
                     // TODO: IS CANDY IN OUR CATCHER RANGE?
@@ -208,8 +238,19 @@
             // EVERY ANIMATION FRAME WE DO THIS
             var render = function (modifier) {
                 if (!freeze) {
+                    frames++;
                     // console.log(modifier);
                     candies(modifier);
+
+                    // http://stackoverflow.com/questions/16505559/how-can-i-use-modulo-operator-in-javascript
+                    if (frames % 120 === 0) {
+                        console.log('time to let a candy fall, or not...');
+
+                        // http://stackoverflow.com/questions/8878015/return-true-or-false-randomly
+                        if (Math.random() < 0.5) {
+                            showCandy();
+                        }
+                    }
                 }
             };
 
@@ -246,10 +287,11 @@
                 
                 var key = e.keyCode;
                 
+                // MOVE CATCHER
                 if (key === 37) {
-                    setPosition(-1);
+                    setPositionCatcher(-1);
                 } else if (key === 39) {
-                    setPosition(1);
+                    setPositionCatcher(1);
                 }
 
             });
@@ -266,6 +308,8 @@
             // SHOW 1 CANDY TO BEGIN WITH JUST FOR DEMO
             showCandy();
 
+            // FOCUS ON CURRENT WINDOW SO OUR KEYDOWN IS ALSO LISTENING (sometimes you can have focus on Chrome inspector for example)
+            $(w).focus();
 
         </script>
     </body>
