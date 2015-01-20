@@ -21,6 +21,7 @@
             .evil-game {
                 width: 600px;
                 height: 600px;
+                overflow: hidden; /* don't show anything which overflows */
                 margin: 0 auto;
                 position: relative;
                 border: 1px solid red;
@@ -35,6 +36,21 @@
                 border: 1px solid green;
                 background: yellow;
             }
+
+            .evil-candy {
+                position: absolute;
+                top: 0px;
+                width: 30px;
+                height: 30px;
+                border: 1px solid green;
+                background: blue;
+
+            }
+
+            .evil-candy-red {
+                background-color: red;
+            }
+
 
             /* http://css-tricks.com/css-media-queries/ */
             @media all and (max-width: 630px) {
@@ -59,20 +75,40 @@
 
         <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
 
-        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
         <script>
 
-            window.console.log("1234 455");
-
+            // WE MAKE THIS APP USING JQUERY, JUST A LIBRARY
+            // WE COULD USE GAME FRAMEWORK BUT WE WANT TO LEARN MORE ABOUT THE BASICS
+            // THE STUFF WE MAKE CAN BE USED FOR MAKING SITES AS WELL
             // http://api.jquery.com/
 
             // CONFIG ? MODEL
-            var $catcher = $('.evil-catcher');
-            var catcherWidth = 60;
+            var w = window; // reference to window (window and document are browser variables)
+            var $game = $('.evil-game'); // Selector using jQuery API
+            var $catcher = $('.evil-catcher'); // Selector using jQuery API
+            var candyTemplate = '<div class="evil-candy"></div>'; // string
+
+
+            var maxWidth = $game.innerWidth(); // Using var $game which is jQuery object which has api http://api.jquery.com/innerwidth/
+            var maxHeight = $game.innerHeight();
+
+            var freeze = false;
+
+            // TODO: ON MOBILE WE HAVE SMALLER ONES
+            var catcherWidth = 60; // number
+            var candyWidth = 30; // number
+            var speed = 1; // number
+
+            var frames = 0;
             var PIXELS = 10;
+            var DROP = 100; // CANDY DROP PIXELS
 
-            var maxWidth = $('.evil-game').innerWidth();
 
+            var falling = []; // array, WE NEED A COLLECTION WITH CURRENT FALLING CANDIES
+
+            // OUR MODEL FOR OUR GAME
+            // object
+            // Most games have Model, View and Controller called MVC
             var model = {
                 'width': 123,
                 'lives': 4,
@@ -80,15 +116,19 @@
             };
 
 
+            //#################
             // CONTROLLER FUNCTIONS
+            // WHEN OUR PAGE IS RESIZED
             var resetValues = function () {
-                maxWidth = $('.evil-game').innerWidth();
-                console.log(maxWidth);
+                maxWidth = $game.innerWidth();
+                maxHeight = $game.innerHeight();
+
                 // Do position catcher in the middle
                 var pos = maxWidth / 2 - catcherWidth / 2;
                 $catcher.css('left', pos);
             }
 
+            //#################
             // MOVE OUR CATCHER
             var setPosition = function (direction) {
                 
@@ -105,15 +145,118 @@
             };
 
 
+            //#################
+            // SHOW A NEW CANDY
+            var showCandy = function() {
+                var min = 0;
+                var max = maxWidth - catcherWidth;
+
+                var x = Math.floor(Math.random() * (max - min + 1)) + min;
+
+                var $candy = $(candyTemplate);
+
+                $game.append($candy);
+                $candy.css({
+                    'left': x,
+                    'top': - candyWidth + 'px'
+                });
+
+                // ADD CANDY TO OUR FALLING COLLECTION
+                falling.push({
+                    'object': $candy,
+                    'top': 0,
+                    'speed': speed
+                });
+
+                // TODO: PICK RANDOM CANDY LOOK AND FEEL
+                
+
+            };
 
 
+
+            //#################
+            // FALLING CANDY
+            var candies = function(modifier) {
+
+                // http://api.jquery.com/jquery.each/
+                // is a simple for loop
+                $.each(falling, function(i, candy) {
+                    
+                    // if a candy in our collection is defined (so not deleted)
+                    if (candy) {
+
+                        candy.top += modifier * DROP;
+                        (candy.object).css('top', candy.top);
+
+                        // REACHED GROUND
+                        if (candy.top > maxHeight) {
+                            // candy reached ground
+                            delete falling[i]; // leaves undefined item in our collection
+                            // TODO: TAKE A LIFE
+                        }
+                    }
+
+                    // TODO: IS CANDY IN OUR CATCHER RANGE?
+
+
+                });
+
+            };
+            //#################
+            
+
+
+            //#################
+            // EVERY ANIMATION FRAME WE DO THIS
+            var render = function (modifier) {
+                if (!freeze) {
+                    frames++;
+                    // console.log(modifier);
+                    candies(modifier);
+
+                    // http://stackoverflow.com/questions/16505559/how-can-i-use-modulo-operator-in-javascript
+                    if (frames % 120 === 0) {
+                        console.log('uhhuuuu');
+
+                        // http://stackoverflow.com/questions/8878015/return-true-or-false-randomly
+                        if (Math.random() < 0.5) {
+                            showCandy();
+                        }
+                    }
+                }
+            };
+
+
+            //#################
+            // GAMELOOP
+            var then = Date.now();
+            requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.msRequestAnimationFrame || w.mozRequestAnimationFrame;
+
+
+            var gameLoop = function () {
+                var now = Date.now();
+                var delta = now - then;
+
+                render(delta / 1000);
+
+                then = now;
+
+                // Request to do this again ASAP
+                requestAnimationFrame(gameLoop);
+            };
+            //#################
+            
+
+
+            //#################
             // EVENTS
-            $(window).on("resize", function() {
+            $(w).on("resize", function() {
                 resetValues();
             });
 
 
-            $(window).on("keydown", function(e) {
+            $(w).on("keydown", function(e) {
                 
                 var key = e.keyCode;
                 
@@ -124,9 +267,19 @@
                 }
 
             });
+            //#################
+            
 
+
+
+            //#################
             // INIT OUR APPLICATION
             resetValues();
+            gameLoop();
+
+            // SHOW 1 CANDY TO BEGIN WITH JUST FOR DEMO
+            showCandy();
+
 
         </script>
     </body>
