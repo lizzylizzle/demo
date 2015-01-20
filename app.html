@@ -29,8 +29,6 @@
 
             .evil-catcher {
                 position: absolute;
-                left: 50%;
-                margin: 0 0 0 -30px;
                 bottom: 10px;
                 width: 60px;
                 height: 60px;
@@ -71,6 +69,7 @@
             // CONFIG ? MODEL
             var $catcher = $('.evil-catcher');
             var catcherWidth = 60;
+            var PIXELS = 10;
 
             var maxWidth = $('.evil-game').innerWidth();
 
@@ -85,12 +84,28 @@
             var resetValues = function () {
                 maxWidth = $('.evil-game').innerWidth();
                 console.log(maxWidth);
+                // Do position catcher in the middle
+                var pos = maxWidth / 2 - catcherWidth / 2;
+                $catcher.css('left', pos);
             }
 
+            // MOVE OUR CATCHER
             var setPosition = function (direction) {
-                console.log($catcher.offsetLeft);
-                $catcher.css('left', 10);
+                
+                var pos = $catcher[0].offsetLeft + (PIXELS * direction);
+                var max = maxWidth - catcherWidth;
+
+                if (pos > max) {
+                    pos = 0;
+                } else if (pos < 0) {
+                    pos = max;
+                }
+
+                $catcher.css('left', pos);
             };
+
+
+
 
             // EVENTS
             $(window).on("resize", function() {
@@ -101,12 +116,16 @@
             $(window).on("keydown", function(e) {
                 
                 var key = e.keyCode;
-                if (key === 37 || key === 39) {
-                    setPosition(key);
+                
+                if (key === 37) {
+                    setPosition(-1);
+                } else if (key === 39) {
+                    setPosition(1);
                 }
 
             });
 
+            // INIT OUR APPLICATION
             resetValues();
 
         </script>
