@@ -17,40 +17,50 @@
                 margin: 0;
                 font: 14px verdana;
             }
+
             .evil-game {
                 width: 600px;
                 height: 600px;
+                overflow: hidden; /* don't show anything which overflows */
                 margin: 0 auto;
                 position: relative;
                 border: 1px solid red;
             }
+
+
             .evil-catcher {
                 position: absolute;
-                left: 50%;
-                margin: 0 0 0 -30px;
                 bottom: 10px;
                 width: 60px;
                 height: 60px;
-                border: 1px solid black;
+                border: 1px solid green;
                 background: yellow;
             }
+
             .evil-candy {
                 position: absolute;
-                left: 30%;
-                margin: 0 0 0 -30px;
-                top: 10px;
+                top: 0px;
                 width: 30px;
                 height: 30px;
-                border: 1px solid black;
+                border: 1px solid green;
                 background: blue;
 
             }
+
+            .evil-candy-red {
+                background-color: red;
+            }
+
+
             /* http://css-tricks.com/css-media-queries/ */
             @media all and (max-width: 630px) {
                 .evil-game {
                     width: 100%;
                 }
             }
+
+
+
         </style>
     </head>
     <body>
@@ -58,80 +68,200 @@
         
         <div class="evil-game">
 
-        <div class="evil-catcher">
-        </div>
-        <div class="evil-candy">
-        </div>
+            <div class="evil-catcher">
+            </div>
 
         </div>
 
         <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
-   
+
         <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
         <script>
- window.console.log("1234 455");
+
+            window.console.log("1234 455");
+
             // http://api.jquery.com/
+
             // CONFIG ? MODEL
+            var w = window;
+            var $game = $('.evil-game');
             var $catcher = $('.evil-catcher');
+            var candyTemplate = '<div class="evil-candy"></div>';
+
+            var maxWidth = $game.innerWidth();
+            var maxHeight = $game.innerHeight();
+
+            var freeze = false;
+
+            // TODO: ON MOBILE WE HAVE SMALLER ONES
             var catcherWidth = 60;
-            var maxWidth = $('.evil-game').innerWidth();
+            var candyWidth = 30;
+            var speed = 1;
+
+            var PIXELS = 10;
+            var DROP = 100; // CANDY DROP PIXELS
+
+
+            var falling = []; // WE NEED A CONTAINER WITH CURRENT FALLING CANDIES
+
             var model = {
                 'width': 123,
                 'lives': 4,
                 'highscore': 0
+            };
+
+
+            //#################
+            // CONTROLLER FUNCTIONS
+            // WHEN OUR PAGE IS RESIZED
+            var resetValues = function () {
+                maxWidth = $game.innerWidth();
+                maxHeight = $game.innerHeight();
+
+                // Do position catcher in the middle
+                var pos = maxWidth / 2 - catcherWidth / 2;
+                $catcher.css('left', pos);
+            }
+
+            //#################
+            // MOVE OUR CATCHER
+            var setPosition = function (direction) {
+                
+                var pos = $catcher[0].offsetLeft + (PIXELS * direction);
+                var max = maxWidth - catcherWidth;
+
+                if (pos > max) {
+                    pos = 0;
+                } else if (pos < 0) {
+                    pos = max;
+                }
+
+                $catcher.css('left', pos);
+            };
+
+
+            //#################
+            // SHOW A NEW CANDY
+            var showCandy = function() {
+                var min = 0;
+                var max = maxWidth - catcherWidth;
+
+                var x = Math.floor(Math.random() * (max - min + 1)) + min;
+
+                var $candy = $(candyTemplate);
+
+                $game.append($candy);
+                $candy.css({
+                    'left': x,
+                    'top': - candyWidth + 'px'
+                });
+
+                // ADD CANDY TO OUR FALLING COLLECTION
+                falling.push({
+                    'object': $candy,
+                    'top': 0,
+                    'speed': speed
+                });
+
+                // TODO: PICK RANDOM CANDY LOOK AND FEEL
+                
+
+            };
+
+
+
+            //#################
+            // FALLING CANDY
+            var candies = function(modifier) {
+
+                // http://api.jquery.com/jquery.each/
+                // is a simple for loop
+                $.each(falling, function(i, candy) {
+
+                    candy.top += modifier * DROP;
+                    (candy.object).css('top', candy.top);
+
+                    // REACHED GROUND
+                    if (candy.top > maxHeight) {
+                        // candy reached ground
+                        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice
+                        falling.splice(i, 1);
+
+                        // TODO: TAKE A LIFE
+                    }
+
+                    // TODO: IS CANDY IN OUR CATCHER RANGE?
+
+
+                });
+
+            };
+            //#################
             
 
+
+            //#################
+            // EVERY ANIMATION FRAME WE DO THIS
+            var render = function (modifier) {
+                if (!freeze) {
+                    // console.log(modifier);
+                    candies(modifier);
+                }
             };
-            // CONTROLLER FUNCTIONS
-            var resetValues = function () {
-                maxWidth = $('.evil-game').innerWidth();
-                console.log(maxWidth);
-            }
-            var setPosition = function (direction) {
-                console.log($catcher.offsetLeft);
-                $catcher.css('left', 10);
+
+
+            //#################
+            // GAMELOOP
+            var then = Date.now();
+            requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.msRequestAnimationFrame || w.mozRequestAnimationFrame;
+
+
+            var gameLoop = function () {
+                var now = Date.now();
+                var delta = now - then;
+
+                render(delta / 1000);
+
+                then = now;
+
+                // Request to do this again ASAP
+                requestAnimationFrame(gameLoop);
             };
+            //#################
+            
+
+
+            //#################
             // EVENTS
-            $(window).on("resize", function() {
+            $(w).on("resize", function() {
                 resetValues();
             });
-            $(window).on("keydown", function(e) {
+
+
+            $(w).on("keydown", function(e) {
                 
                 var key = e.keyCode;
-                if (key === 37 || key === 39) {
-                    setPosition(key);
+                
+                if (key === 37) {
+                    setPosition(-1);
+                } else if (key === 39) {
+                    setPosition(1);
                 }
-            });
-             window.console.log("1234 455");
-            // http://api.jquery.com/
-            var $candy = $('.evil-candy');
-            var candyWidth = 20;
-            var maxWidth = $('.evil-game').innerWidth();
-            var model = {
-                'width': 20,
-                'lives': 4,
-                'highscore': 0
-            };
-            //FALLING OBJECT
-            var resetValues = function (){
-                maxWidth = $('.evil-game').innerWidth();
-                console.log(maxWidth);
-                };
 
-            var setPosition = function (direction){
-                console.log($catcheroffsetRight);
-                $candy.css('left', 10);
-            };
-            window.console.log("1234 455");
-
-            $(window).on("resize", function(){
-                resetValues();
             });
-            $(window).on("click", function(e){
+            //#################
+            
 
-                var onclick = document.getElementsByOnclick("a")[0].getOnclick('onClick');
-            });
-            window.console.log("1234 455");
+
+
+            //#################
+            // INIT OUR APPLICATION
+            resetValues();
+            gameLoop();
+
+            // SHOW 1 CANDY TO BEGIN WITH JUST FOR DEMO
+            showCandy();
+
 
         </script>
     </body>
