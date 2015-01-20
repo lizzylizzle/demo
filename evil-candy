@@ -75,35 +75,39 @@
 
         <script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
 
-        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
         <script>
 
-            window.console.log("1234 455");
-
+            // WE MAKE THIS APP USING JQUERY, JUST A LIBRARY
+            // WE COULD USE GAME FRAMEWORK BUT WE WANT TO LEARN MORE ABOUT THE BASICS
+            // THE STUFF WE MAKE CAN BE USED FOR MAKING SITES AS WELL
             // http://api.jquery.com/
 
             // CONFIG ? MODEL
-            var w = window;
-            var $game = $('.evil-game');
-            var $catcher = $('.evil-catcher');
-            var candyTemplate = '<div class="evil-candy"></div>';
+            var w = window; // reference to window (window and document are browser variables)
+            var $game = $('.evil-game'); // Selector using jQuery API
+            var $catcher = $('.evil-catcher'); // Selector using jQuery API
+            var candyTemplate = '<div class="evil-candy"></div>'; // string
 
-            var maxWidth = $game.innerWidth();
+
+            var maxWidth = $game.innerWidth(); // Using var $game which is jQuery object which has api http://api.jquery.com/innerwidth/
             var maxHeight = $game.innerHeight();
 
             var freeze = false;
 
             // TODO: ON MOBILE WE HAVE SMALLER ONES
-            var catcherWidth = 60;
-            var candyWidth = 30;
-            var speed = 1;
+            var catcherWidth = 60; // number
+            var candyWidth = 30; // number
+            var speed = 1; // number
 
             var PIXELS = 10;
             var DROP = 100; // CANDY DROP PIXELS
 
 
-            var falling = []; // WE NEED A CONTAINER WITH CURRENT FALLING CANDIES
+            var falling = []; // array, WE NEED A COLLECTION WITH CURRENT FALLING CANDIES
 
+            // OUR MODEL FOR OUR GAME
+            // object
+            // Most games have Model, View and Controller called MVC
             var model = {
                 'width': 123,
                 'lives': 4,
